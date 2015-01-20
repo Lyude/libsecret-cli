@@ -1,0 +1,15 @@
+/build-aux
+/aclocal.m4
+/autom4te.cache
+Makefile
+Makefile.in
+config.*
+/depcomp
+/install-sh
+/missing
+.deps/
+stamp-h1
+/configure
+*.o
+*.l?
+*.l?
