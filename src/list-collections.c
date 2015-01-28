@@ -21,7 +21,8 @@
 #include "list-collections.h"
 #include "options.h"
 
-void secret_cli_list_collections(SecretService *service) {
+void
+secret_cli_list_collections(SecretService *service) {
 	GError *error = NULL;
 	GList *collections;
 
