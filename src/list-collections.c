@@ -22,7 +22,7 @@
 #include "options.h"
 
 void
-secret_cli_list_collections(SecretService *service) {
+libsecret_cli_list_collections(SecretService *service) {
 	GError *error = NULL;
 	GList *collections;
 
