@@ -16,6 +16,8 @@
 
 #include <libsecret/secret.h>
 
-extern void libsecret_cli_list_collections(SecretService *service);
+extern GList * libsecret_cli_list_collections(SecretService *service,
+					      GError **error);
+extern void libsecret_cli_command_list_collections(SecretService *service);
 
 #endif /* !LIST_COLLECTIONS_H */

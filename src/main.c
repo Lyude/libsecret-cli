@@ -70,7 +70,7 @@ main(int argc, char *argv[]) {
 	}
 
 	if (strcmp(argv[1], "list-collections") == 0)
-		libsecret_cli_list_collections(service);
+		libsecret_cli_command_list_collections(service);
 	else {
 		print_cmd_help(option_context);
 		exit(1);

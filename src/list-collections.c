@@ -22,21 +22,20 @@
 #include "options.h"
 
 void
-libsecret_cli_list_collections(SecretService *service) {
+libsecret_cli_command_list_collections(SecretService *service) {
 	GError *error = NULL;
 	GList *collections;
 
 	if (libsecret_cli_verbose)
 		printf("Getting list of collections...\n");
 
-	g_debug("Loading collections");
-	if (!secret_service_load_collections_sync(service, NULL, &error)) {
-		fprintf(stderr, "Couldn't get collections list: %s\n",
+	collections = libsecret_cli_list_collections(service, &error);
+
+	if (!collections) {
+		fprintf(stderr, "Couldn't get list of collections: %s\n",
 			error->message);
 		exit(1);
 	}
-
-	collections = secret_service_get_collections(service);
 
 	for (GList *l = collections; l != NULL; l = l->next) {
 		char *label = secret_collection_get_label(l->data);
@@ -51,4 +50,17 @@ libsecret_cli_list_collections(SecretService *service) {
 	g_list_free(collections);
 }
 
+GList *
+libsecret_cli_list_collections(SecretService *service,
+			       GError **error) {
+	GList *collections;
 
+	g_debug("Loading collections");
+
+	if (!secret_service_load_collections_sync(service, NULL, error))
+		return NULL;
+
+	collections = secret_service_get_collections(service);
+
+	return collections;
+}
