@@ -11,6 +11,14 @@ AC_HEADER_STDBOOL
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
 PKG_CHECK_MODULES([LIBSECRET], [libsecret-1])
 
+# Get the path for the dbus-session command
+AC_PATH_PROG([DBUS_DAEMON], "dbus-daemon", "no")
+if test x"${DBUS_DAEMON}" == x"no" ; then
+	AC_MSG_ERROR([Could not find dbus-daemon.])
+fi
+
+AC_DEFINE_UNQUOTED(DBUS_DAEMON, "$DBUS_DAEMON", [dbus-daemon path])
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

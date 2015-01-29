@@ -13,6 +13,7 @@
 
 #include "options.h"
 #include "list-collections.h"
+#include "../config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,8 @@
 #include <glib.h>
 #include <string.h>
 #include <libsecret/secret.h>
+
+static pid_t dbus_pid = 0;
 
 bool libsecret_cli_verbose = false;
 
@@ -32,6 +35,35 @@ static void
 print_cmd_help(GOptionContext *option_context) {
 	fprintf(stderr, "%s",
 		g_option_context_get_help(option_context, true, NULL));
+}
+
+static bool
+try_starting_dbus(GError **error) {
+	char *dbus_stdout, *dbus_stderr;
+	int exit_status;
+
+	g_debug("No dbus session was found, attempting to start one");
+
+	if (!g_spawn_command_line_sync(
+		DBUS_DAEMON " --session --print-address 1 --print-pid 2 --fork",
+		&dbus_stdout, &dbus_stderr, &exit_status, error)) {
+		return false;
+	}
+
+	if (exit_status != 0) {
+		*error = g_error_new(G_SPAWN_ERROR_FAILED, 1,
+				     "dbus-daemon exited with %d", exit_status);
+		return false;
+	}
+
+	dbus_pid = (pid_t) strtod(dbus_stderr, NULL);
+
+	setenv("DBUS_SESSION_BUS_ADDRESS", dbus_stdout, 1);
+
+	g_free(dbus_stdout);
+	g_free(dbus_stderr);
+
+	return true;
 }
 
 int
@@ -62,11 +94,38 @@ main(int argc, char *argv[]) {
 	}
 
 	g_debug("Getting SecretService proxy");
+
+try_getting_secret_service_proxy:
+
 	service = secret_service_get_sync (SECRET_SERVICE_NONE, NULL, &error);
 	if (!service) {
-		fprintf(stderr, "Couldn't connect to secret service: %s\n",
-			error->message);
-		exit(1);
+		/* If we can't get the servce and there's no dbus address, it's
+		 * got to be that dbus isn't running, try to run dbus if that's
+		 * the case
+		 */
+		if (g_error_matches(error, G_SPAWN_EXIT_ERROR, 1) &&
+		    getenv("DISPLAY") == NULL &&
+		    getenv("DBUS_SESSION_BUS_ADDRESS") == NULL) {
+			if (!try_starting_dbus(&error)) {
+				fprintf(stderr, "Couldn't start dbus: %s\n",
+					error->message);
+				exit(1);
+			}
+
+			g_debug("dbus session created, trying to connect to "
+				"secret service again");
+
+			g_error_free(error);
+			error = NULL;
+
+			goto try_getting_secret_service_proxy;
+		}
+		else {
+			fprintf(stderr,
+				"Couldn't connect to secret service: %s\n",
+				error->message);
+			exit(1);
+		}
 	}
 
 	if (strcmp(argv[1], "list-collections") == 0)
@@ -80,4 +139,9 @@ main(int argc, char *argv[]) {
 	secret_service_disconnect();
 
 	return 0;
+	if (dbus_pid) {
+		g_debug("Ending dbus session");
+
+		kill(dbus_pid, SIGTERM);
+	}
 }
