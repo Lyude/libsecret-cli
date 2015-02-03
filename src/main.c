@@ -138,10 +138,11 @@ try_getting_secret_service_proxy:
 	g_debug("Disconnecting");
 	secret_service_disconnect();
 
-	return 0;
 	if (dbus_pid) {
 		g_debug("Ending dbus session");
 
 		kill(dbus_pid, SIGTERM);
 	}
+
+	return 0;
 }
