@@ -148,7 +148,6 @@ try_getting_secret_service_proxy:
 		}
 	}
 
-	g_warn_if_fail(sigaction(SIGSEGV, &signal_act, NULL) == 0);
 	g_warn_if_fail(sigaction(SIGTERM, &signal_act, NULL) == 0);
 	g_warn_if_fail(sigaction(SIGHUP, &signal_act, NULL) == 0);
 
