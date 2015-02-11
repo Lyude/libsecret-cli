@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <string.h>
 #include <libsecret/secret.h>
+#include <signal.h>
+#include <errno.h>
 
 static pid_t dbus_pid = 0;
 
@@ -65,6 +67,22 @@ try_starting_dbus(GError **error) {
 
 	return true;
 }
+
+static void
+signal_handler(int signal) {
+	g_debug("Disconnecting");
+	secret_service_disconnect();
+
+	if (dbus_pid) {
+		g_debug("Ending dbus session");
+
+		kill(dbus_pid, SIGTERM);
+	}
+}
+
+static struct sigaction signal_act = {
+	.sa_handler = signal_handler
+};
 
 int
 main(int argc, char *argv[]) {
@@ -127,6 +145,10 @@ try_getting_secret_service_proxy:
 			exit(1);
 		}
 	}
+
+	g_warn_if_fail(sigaction(SIGSEGV, &signal_act, NULL) == 0);
+	g_warn_if_fail(sigaction(SIGTERM, &signal_act, NULL) == 0);
+	g_warn_if_fail(sigaction(SIGHUP, &signal_act, NULL) == 0);
 
 	if (strcmp(argv[1], "list-collections") == 0)
 		libsecret_cli_command_list_collections(service);
