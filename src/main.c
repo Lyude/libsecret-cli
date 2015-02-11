@@ -59,6 +59,8 @@ try_starting_dbus(GError **error) {
 	}
 
 	dbus_pid = (pid_t) strtol(dbus_stderr, NULL, 10);
+	g_debug("dbus session started, PID=%d",
+		dbus_pid);
 
 	setenv("DBUS_SESSION_BUS_ADDRESS", dbus_stdout, 1);
 
