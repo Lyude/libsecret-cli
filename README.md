@@ -24,4 +24,6 @@ As of writing this, all you really need is `libsecret`. However, for packagers h
 This project looks dead!
 ========================
 
-If at any point this project looks dead, I promise you: it's probably not. Right now libsecret-cli is strictly a side-project, since my main focuses are on Wayland right now. libsecret-cli is a program I need for my own personal purposes, so it's very unlikely I'll ever drop this project completely, it will just take a long time to finish. :)
+~~If at any point this project looks dead, I promise you: it's probably not. Right now libsecret-cli is strictly a side-project, since my main focuses are on Wayland right now. libsecret-cli is a program I need for my own personal purposes, so it's very unlikely I'll ever drop this project completely, it will just take a long time to finish. :)~~
+
+actually-it's kinda dead at this point, sorry!
